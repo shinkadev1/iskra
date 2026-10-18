@@ -54,6 +54,9 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
+  verification: {
+    yandex: "0a745ec40396da59",
+  },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
