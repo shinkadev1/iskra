@@ -56,6 +56,26 @@ export class ChatApi {
     return text ? (JSON.parse(text) as T) : undefined;
   }
 
+  /** Кука сайта хранится в Chat API. userId — уже известный гость, если браузер прислал его токен. */
+  async saveVisitor(
+    id: string | null,
+    userId: number | null,
+  ): Promise<{ id: string; userId: number; created: boolean }> {
+    const headers = this.headers();
+    headers.set("Content-Type", "application/json");
+    const response = await this.send("/api/v1/visitors", {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        id,
+        bot_key: this.env.WEB_BOT_KEY,
+        user_id: userId,
+      }),
+    });
+    const body = (await response.json()) as { id: string; user_id: number; created: boolean };
+    return { id: body.id, userId: body.user_id, created: body.created };
+  }
+
   async stats(): Promise<ChatStats> {
     const response = await this.send("/api/v1/stats", { headers: this.headers() });
     return response.json() as Promise<ChatStats>;

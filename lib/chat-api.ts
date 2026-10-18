@@ -1,5 +1,12 @@
 /** Клиент публичного web-gateway (dating-bot). APP token на сервере gateway. */
 
+import {
+  COOKIE_CONSENT_HEADER,
+  COOKIE_CONSENT_SAVE,
+  readCookieConsent,
+} from "@/lib/cookie-consent";
+import { ensureVisitorId, writeVisitorId } from "@/lib/visitor";
+
 export type Phase = "idle" | "searching" | "chatting";
 
 export type ChatEvent =
@@ -79,6 +86,7 @@ async function api<T>(
   init?: RequestInit,
 ): Promise<T> {
   const headers = new Headers(init?.headers);
+  if (readCookieConsent() === "save") headers.set(COOKIE_CONSENT_HEADER, COOKIE_CONSENT_SAVE);
   if (token) headers.set("Authorization", `Bearer ${token}`);
   if (init?.body && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
@@ -86,6 +94,7 @@ async function api<T>(
   const response = await fetch(`${chatApiBaseUrl()}${path}`, {
     ...init,
     headers,
+    credentials: "include",
   });
   if (response.status === 204) {
     return undefined as T;
@@ -109,7 +118,41 @@ export async function createGuest(): Promise<GuestSession> {
   return session;
 }
 
+let visitorRegistration: Promise<void> | null = null;
+
+const VISITOR_ID_HEADER = "X-Visitor-Id";
+
+/** Сразу пишет куку, затем просит API запомнить посетителя. Повторные вызовы ждут один запрос. */
+export function registerVisitor(): Promise<void> {
+  if (typeof window === "undefined" || readCookieConsent() !== "save") return Promise.resolve();
+  const visitorId = ensureVisitorId();
+  if (!visitorRegistration) {
+    const headers = new Headers();
+    headers.set(COOKIE_CONSENT_HEADER, COOKIE_CONSENT_SAVE);
+    headers.set(VISITOR_ID_HEADER, visitorId);
+    const existing = loadStoredGuest();
+    if (existing) headers.set("Authorization", `Bearer ${existing.token}`);
+    visitorRegistration = fetch(`${chatApiBaseUrl()}/api/v1/visitors`, {
+      method: "POST",
+      credentials: "include",
+      headers,
+    })
+      .then(async (response) => {
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const text = await response.text();
+        if (!text) return;
+        const body = JSON.parse(text) as { id?: unknown };
+        if (typeof body.id === "string") writeVisitorId(body.id);
+      })
+      .catch(() => {
+        visitorRegistration = null;
+      });
+  }
+  return visitorRegistration;
+}
+
 export async function ensureGuest(): Promise<GuestSession> {
+  await registerVisitor();
   const existing = loadStoredGuest();
   if (existing) {
     try {

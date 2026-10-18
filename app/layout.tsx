@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import { Manrope } from "next/font/google";
+import { CookieNotice } from "@/components/cookie-notice";
 import { siteDescription, siteJsonLd, siteName, siteTitle, siteUrl } from "@/lib/site";
 import "./globals.css";
 
@@ -65,6 +66,7 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
           К содержанию
         </a>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
+        <CookieNotice />
         {children}
       </body>
     </html>

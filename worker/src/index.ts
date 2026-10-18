@@ -3,6 +3,9 @@
 import { ChatApi, ChatApiError, type PeerAction } from "./chat-api";
 import { GUEST_ID_HEADER } from "./guest-hub";
 import { issueGuestToken, newGuestId, verifyGuestToken } from "./guest-token";
+import { visitorIdFromRequest, visitorSetCookie } from "./visitor-cookie";
+
+const COOKIE_CONSENT_HEADER = "X-Cookie-Consent";
 
 export { GuestHub } from "./guest-hub";
 
@@ -33,10 +36,18 @@ function corsHeaders(request: Request, env: Env): Headers {
   if (origin && allowed.includes(origin)) {
     headers.set("Access-Control-Allow-Origin", origin);
     headers.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-    headers.set("Access-Control-Allow-Headers", "Authorization, Content-Type");
+    headers.set(
+      "Access-Control-Allow-Headers",
+      "Authorization, Content-Type, X-Visitor-Id, X-Cookie-Consent",
+    );
+    headers.set("Access-Control-Allow-Credentials", "true");
     headers.set("Vary", "Origin");
   }
   return headers;
+}
+
+function savesCookie(request: Request): boolean {
+  return request.headers.get(COOKIE_CONSENT_HEADER) === "save";
 }
 
 function bearerToken(request: Request): string {
@@ -57,11 +68,40 @@ async function readMessageText(request: Request): Promise<string | null> {
   }
 }
 
-async function createGuest(env: Env): Promise<Response> {
-  const guestId = newGuestId();
+async function rememberVisitor(
+  request: Request,
+  env: Env,
+  userId: number | null,
+): Promise<{ id: string; userId: number; created: boolean }> {
+  return new ChatApi(env).saveVisitor(visitorIdFromRequest(request), userId);
+}
+
+async function saveVisitor(request: Request, env: Env): Promise<Response> {
+  if (!savesCookie(request)) return new Response(null, { status: 204 });
+  const userId = await verifyGuestToken(bearerToken(request), env.GUEST_JWT_SECRET);
+  const visitor = await rememberVisitor(request, env, userId);
+  return json({ id: visitor.id }, visitor.created ? 201 : 200, {
+    "Set-Cookie": visitorSetCookie(visitor.id, request),
+  });
+}
+
+async function createGuest(request: Request, env: Env): Promise<Response> {
+  const visitor = savesCookie(request) ? await rememberVisitor(request, env, null) : null;
+  const guestId = visitor?.userId ?? newGuestId();
   await new ChatApi(env).peer("POST", guestId, "visit");
   const token = await issueGuestToken(guestId, env.GUEST_JWT_SECRET);
-  return json({ token, guest_id: guestId }, 201);
+  console.log(
+    JSON.stringify({
+      message: "guest created",
+      guestId,
+      visitorId: visitor?.id ?? null,
+    }),
+  );
+  return json(
+    { token, guest_id: guestId },
+    201,
+    visitor ? { "Set-Cookie": visitorSetCookie(visitor.id, request) } : undefined,
+  );
 }
 
 async function openGuestEvents(request: Request, env: Env): Promise<Response> {
@@ -86,7 +126,6 @@ async function guestAction(request: Request, env: Env, route: string): Promise<R
   if (guestId === null) {
     return errorResponse(401, "Нужен действующий токен", { "WWW-Authenticate": "Bearer" });
   }
-
   let body: { text: string } | undefined;
   if (target.action === "messages") {
     const text = await readMessageText(request);
@@ -110,7 +149,8 @@ async function route(request: Request, env: Env): Promise<Response> {
 
   const path = pathname.slice(API_PREFIX.length);
   if (request.method === "GET" && path === "/stats") return json(await new ChatApi(env).stats());
-  if (request.method === "POST" && path === "/guests") return createGuest(env);
+  if (request.method === "POST" && path === "/visitors") return saveVisitor(request, env);
+  if (request.method === "POST" && path === "/guests") return createGuest(request, env);
   if (request.method === "GET" && path === "/me/events") return openGuestEvents(request, env);
   return guestAction(request, env, `${request.method} ${path}`);
 }

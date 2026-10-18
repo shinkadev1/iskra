@@ -8,7 +8,7 @@
   "vars": {
     "CHAT_API_URL": "https://api.chatwithyou.site",
     "WEB_BOT_KEY": "site",
-    "ALLOWED_ORIGINS": "http://localhost:3000"
+    "ALLOWED_ORIGINS": "http://localhost:3000,http://localhost:3010"
   },
   // Secrets (wrangler secret put): CHAT_API_APP_TOKEN, GUEST_JWT_SECRET,
   // CF_ACCESS_CLIENT_ID, CF_ACCESS_CLIENT_SECRET.
