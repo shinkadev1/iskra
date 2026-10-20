@@ -10,6 +10,7 @@ import {
   openEvents,
   reportAndSearch,
   sendMessage,
+  fetchPartnerMedia,
   startSearch,
   stopChat,
   type ChatEvent,
@@ -20,6 +21,8 @@ type UiMessage = {
   id: string;
   role: "me" | "partner" | "system";
   text: string;
+  mediaUrl?: string;
+  mediaKind?: string;
 };
 
 const phaseLabel: Record<Exclude<Phase, "idle">, string> = {
@@ -43,6 +46,12 @@ function formatOnline(count: number): string {
 
 function nextId(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function PartnerFile({ url, kind }: { url: string; kind: string }) {
+  if (kind === "voice") return <audio controls src={url} />;
+  if (kind === "photo") return <img src={url} alt="Фото собеседника" />;
+  return <video controls playsInline src={url} />;
 }
 
 export function ChatRoom() {
@@ -88,6 +97,33 @@ export function ChatRoom() {
           ...prev,
           { id: nextId(), role: "partner", text: event.text },
         ]);
+        return;
+      }
+      if (event.type === "media") {
+        setPhase("chatting");
+        const token = tokenRef.current;
+        const mediaId = event.media_id;
+        if (!token || !mediaId) return;
+        void fetchPartnerMedia(token, mediaId)
+          .then((file) => {
+            if (cancelled) {
+              URL.revokeObjectURL(file.url);
+              return;
+            }
+            setMessages((prev) => [
+              ...prev,
+              {
+                id: nextId(),
+                role: "partner",
+                text: "",
+                mediaUrl: file.url,
+                mediaKind: event.kind || file.kind,
+              },
+            ]);
+          })
+          .catch(() => {
+            if (!cancelled) pushSystem("Собеседник прислал файл, но он не открылся.");
+          });
         return;
       }
       if (event.type === "partner_left") {
@@ -289,7 +325,11 @@ export function ChatRoom() {
                 key={item.id}
                 className={`chat-bubble chat-bubble-${item.role}`}
               >
-                {item.text}
+                {item.mediaUrl ? (
+                  <PartnerFile url={item.mediaUrl} kind={item.mediaKind || "photo"} />
+                ) : (
+                  item.text
+                )}
               </div>
             ))
           )}

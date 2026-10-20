@@ -1219,6 +1219,18 @@
     text-align: center;
   }
 
+  .chat-bubble img,
+  .chat-bubble video,
+  .chat-bubble audio {
+    display: block;
+    max-width: min(18rem, 70vw);
+    border-radius: 0.7rem;
+  }
+
+  .chat-bubble audio {
+    width: min(16rem, 70vw);
+  }
+
   .chat-actions {
     display: flex;
     flex-wrap: wrap;

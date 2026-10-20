@@ -118,6 +118,13 @@ async function openGuestEvents(request: Request, env: Env): Promise<Response> {
   return env.GUEST_HUB.getByName("hub").fetch(forwarded);
 }
 
+async function guestMedia(request: Request, env: Env, mediaId: string): Promise<Response> {
+  if ((await verifyGuestToken(bearerToken(request), env.GUEST_JWT_SECRET)) === null) {
+    return errorResponse(401, "Нужен действующий токен", { "WWW-Authenticate": "Bearer" });
+  }
+  return new ChatApi(env).downloadMedia(mediaId);
+}
+
 async function guestAction(request: Request, env: Env, route: string): Promise<Response> {
   const target = GUEST_ROUTES[route];
   if (!target) return errorResponse(404, "Не найдено");
@@ -152,6 +159,8 @@ async function route(request: Request, env: Env): Promise<Response> {
   if (request.method === "POST" && path === "/visitors") return saveVisitor(request, env);
   if (request.method === "POST" && path === "/guests") return createGuest(request, env);
   if (request.method === "GET" && path === "/me/events") return openGuestEvents(request, env);
+  const media = path.match(/^\/me\/media\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i);
+  if (request.method === "GET" && media) return guestMedia(request, env, media[1]);
   return guestAction(request, env, `${request.method} ${path}`);
 }
 

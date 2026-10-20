@@ -90,6 +90,19 @@ export class ChatApi {
     }
   }
 
+  /** Файл из события media. Гость уже проверен, идентификатор знает только он. */
+  async downloadMedia(mediaId: string): Promise<Response> {
+    const response = await this.send(`/api/v1/media/${mediaId}`, { headers: this.headers() });
+    const headers = new Headers();
+    const type = response.headers.get("content-type");
+    if (type) headers.set("Content-Type", type);
+    const kind = response.headers.get("x-media-kind");
+    if (kind) headers.set("X-Media-Kind", kind);
+    headers.set("Cache-Control", "private, max-age=3600");
+    headers.set("Access-Control-Expose-Headers", "X-Media-Kind");
+    return new Response(response.body, { status: 200, headers });
+  }
+
   /** Upstream WebSocket со всеми событиями пользователей web. */
   async openEvents(): Promise<WebSocket> {
     const headers = this.headers();

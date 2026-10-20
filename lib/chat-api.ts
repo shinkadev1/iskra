@@ -12,7 +12,13 @@ export type Phase = "idle" | "searching" | "chatting";
 export type ChatEvent =
   | { type: "partner_found" }
   | { type: "message"; text: string }
-  | { type: "partner_left"; reason?: string };
+  | { type: "partner_left"; reason?: string }
+  | { type: "media"; media_id: string; kind?: string; content_type?: string };
+
+export type PartnerMedia = {
+  url: string;
+  kind: string;
+};
 
 export type GuestSession = {
   token: string;
@@ -193,6 +199,24 @@ export async function reportAndSearch(token: string): Promise<Phase> {
     method: "POST",
   });
   return body.phase;
+}
+
+export async function fetchPartnerMedia(token: string, mediaId: string): Promise<PartnerMedia> {
+  const headers = new Headers();
+  headers.set("Authorization", `Bearer ${token}`);
+  if (readCookieConsent() === "save") headers.set(COOKIE_CONSENT_HEADER, COOKIE_CONSENT_SAVE);
+  const response = await fetch(`${chatApiBaseUrl()}/api/v1/me/media/${mediaId}`, {
+    headers,
+    credentials: "include",
+  });
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status}`);
+  }
+  const blob = await response.blob();
+  return {
+    url: URL.createObjectURL(blob),
+    kind: response.headers.get("x-media-kind") || "photo",
+  };
 }
 
 export async function sendMessage(
