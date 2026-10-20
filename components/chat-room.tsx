@@ -48,9 +48,9 @@ function nextId(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
-function PartnerFile({ url, kind }: { url: string; kind: string }) {
+function PartnerFile({ url, kind, alt }: { url: string; kind: string; alt: string }) {
   if (kind === "voice") return <audio controls src={url} />;
-  if (kind === "photo") return <img src={url} alt="Фото собеседника" />;
+  if (kind === "photo") return <img src={url} alt={alt} />;
   return <video controls playsInline src={url} />;
 }
 
@@ -124,6 +124,36 @@ export function ChatRoom() {
           .catch(() => {
             if (!cancelled) pushSystem("Собеседник прислал файл, но он не открылся.");
           });
+        return;
+      }
+      if (event.type === "notice") {
+        const text = event.text?.trim() || "";
+        const mediaId = event.media_id;
+        const token = tokenRef.current;
+        if (mediaId && token) {
+          void fetchPartnerMedia(token, mediaId)
+            .then((file) => {
+              if (cancelled) {
+                URL.revokeObjectURL(file.url);
+                return;
+              }
+              setMessages((prev) => [
+                ...prev,
+                {
+                  id: nextId(),
+                  role: "system",
+                  text,
+                  mediaUrl: file.url,
+                  mediaKind: event.kind || file.kind,
+                },
+              ]);
+            })
+            .catch(() => {
+              if (!cancelled && text) pushSystem(text);
+            });
+          return;
+        }
+        if (text) pushSystem(text);
         return;
       }
       if (event.type === "partner_left") {
@@ -326,10 +356,13 @@ export function ChatRoom() {
                 className={`chat-bubble chat-bubble-${item.role}`}
               >
                 {item.mediaUrl ? (
-                  <PartnerFile url={item.mediaUrl} kind={item.mediaKind || "photo"} />
-                ) : (
-                  item.text
-                )}
+                  <PartnerFile
+                    url={item.mediaUrl}
+                    kind={item.mediaKind || "photo"}
+                    alt={item.role === "system" ? "Уведомление" : "Фото собеседника"}
+                  />
+                ) : null}
+                {item.text ? <span className="chat-bubble-text">{item.text}</span> : null}
               </div>
             ))
           )}

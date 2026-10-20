@@ -13,7 +13,8 @@ export type ChatEvent =
   | { type: "partner_found" }
   | { type: "message"; text: string }
   | { type: "partner_left"; reason?: string }
-  | { type: "media"; media_id: string; kind?: string; content_type?: string };
+  | { type: "media"; media_id: string; kind?: string; content_type?: string }
+  | { type: "notice"; text?: string; media_id?: string; kind?: string; content_type?: string };
 
 export type PartnerMedia = {
   url: string;

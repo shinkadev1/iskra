@@ -1227,6 +1227,12 @@
     border-radius: 0.7rem;
   }
 
+  .chat-bubble img + .chat-bubble-text,
+  .chat-bubble video + .chat-bubble-text {
+    display: block;
+    margin-top: 0.45rem;
+  }
+
   .chat-bubble audio {
     width: min(16rem, 70vw);
   }
