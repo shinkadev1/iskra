@@ -1,5 +1,11 @@
 import { Icon } from "@/components/icon";
-import { supportEmail, telegramBotUrl, vkChatUrl } from "@/lib/site";
+import {
+  supportEmail,
+  supportTelegramUrl,
+  supportVkUrl,
+  telegramBotUrl,
+  vkChatUrl,
+} from "@/lib/site";
 
 const supportMail = `mailto:${supportEmail}`;
 
@@ -29,6 +35,12 @@ export function Footer() {
           <ul>
             <li>
               <a href={supportMail}>Email</a>
+            </li>
+            <li>
+              <a href={supportTelegramUrl}>Telegram</a>
+            </li>
+            <li>
+              <a href={supportVkUrl}>VK</a>
             </li>
           </ul>
         </div>

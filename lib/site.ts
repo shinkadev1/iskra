@@ -17,6 +17,10 @@ export const telegramBotUrl = "https://t.me/IskraDatingTopbot";
 
 export const supportEmail = "support@chatwithyou.site";
 
+export const supportTelegramUrl = "https://t.me/iskradatingsupport";
+
+export const supportVkUrl = "https://vk.ru/club242172702";
+
 export const payUrl = "https://pay.chatwithyou.site";
 
 export const features = [
