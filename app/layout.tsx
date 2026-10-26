@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import { Manrope } from "next/font/google";
 import { CookieNotice } from "@/components/cookie-notice";
+import { GoogleAnalytics } from "@/components/google-analytics";
 import {
   GoogleTagManagerBody,
   GoogleTagManagerHead,
@@ -71,6 +72,7 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
     <html lang="ru" className={manrope.variable}>
       <head>
         <GoogleTagManagerHead />
+        <GoogleAnalytics />
       </head>
       <body className={manrope.className}>
         <GoogleTagManagerBody />
