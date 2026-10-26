@@ -2,6 +2,10 @@ import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import { Manrope } from "next/font/google";
 import { CookieNotice } from "@/components/cookie-notice";
+import {
+  GoogleTagManagerBody,
+  GoogleTagManagerHead,
+} from "@/components/google-tag-manager";
 import { YandexMetrika } from "@/components/yandex-metrika";
 import { siteDescription, siteJsonLd, siteName, siteTitle, siteUrl } from "@/lib/site";
 import "./globals.css";
@@ -65,7 +69,11 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
 
   return (
     <html lang="ru" className={manrope.variable}>
+      <head>
+        <GoogleTagManagerHead />
+      </head>
       <body className={manrope.className}>
+        <GoogleTagManagerBody />
         <a className="skip" href="#main">
           К содержанию
         </a>
