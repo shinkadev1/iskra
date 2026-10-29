@@ -7,6 +7,9 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
   trailingSlash: true,
+  experimental: {
+    agentUpgrade: "security",
+  },
   ...(basePath ? { basePath, assetPrefix: basePath } : {}),
 };
 
