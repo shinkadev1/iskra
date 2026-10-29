@@ -1,7 +1,7 @@
-/** Гостевые JWT (HS256). APP token в браузер не попадает, гость знает только свой id. */
+/** Токены сайта (HS256). APP token в браузер не попадает: гость знает только свой id. */
 
-const AUDIENCE = "chat-guest";
-const TOKEN_DAYS = 30;
+const DEFAULT_AUDIENCE = "chat-guest";
+const DEFAULT_DAYS = 30;
 const MAX_GUEST_ID = 2 ** 48 - 1;
 
 const encoder = new TextEncoder();
@@ -39,14 +39,20 @@ export function newGuestId(): number {
   return Math.min(Math.max(value, 1), MAX_GUEST_ID);
 }
 
-export async function issueGuestToken(guestId: number, secret: string): Promise<string> {
+/** Общий выпуск JWT: sub — строка (гостевой id, email), aud — аудитория. */
+export async function issueToken(
+  sub: string,
+  secret: string,
+  audience: string = DEFAULT_AUDIENCE,
+  days: number = DEFAULT_DAYS,
+): Promise<string> {
   const now = Math.floor(Date.now() / 1000);
   const header = encodeJson({ alg: "HS256", typ: "JWT" });
   const payload = encodeJson({
-    sub: String(guestId),
-    aud: AUDIENCE,
+    sub,
+    aud: audience,
     iat: now,
-    exp: now + TOKEN_DAYS * 24 * 60 * 60,
+    exp: now + days * 24 * 60 * 60,
   });
   const signingInput = `${header}.${payload}`;
   const signature = await crypto.subtle.sign(
@@ -57,8 +63,16 @@ export async function issueGuestToken(guestId: number, secret: string): Promise<
   return `${signingInput}.${toBase64Url(new Uint8Array(signature))}`;
 }
 
-/** id гостя или null, если токен подделан, просрочен или выпущен не для чата. */
-export async function verifyGuestToken(token: string, secret: string): Promise<number | null> {
+export function issueGuestToken(guestId: number, secret: string): Promise<string> {
+  return issueToken(String(guestId), secret);
+}
+
+/** sub токена или null: подделан, просрочен, выпущен не для этой аудитории. */
+export async function verifyToken(
+  token: string,
+  secret: string,
+  audience: string = DEFAULT_AUDIENCE,
+): Promise<string | null> {
   const parts = token.split(".");
   if (parts.length !== 3) return null;
   const [header, payload, signature] = parts;
@@ -77,12 +91,19 @@ export async function verifyGuestToken(token: string, secret: string): Promise<n
       aud?: string;
       exp?: number;
     };
-    if (claims.aud !== AUDIENCE) return null;
+    if (claims.aud !== audience) return null;
     if (typeof claims.exp !== "number" || claims.exp * 1000 <= Date.now()) return null;
-    const guestId = Number(claims.sub);
-    if (!Number.isSafeInteger(guestId) || guestId <= 0 || guestId > MAX_GUEST_ID) return null;
-    return guestId;
+    return typeof claims.sub === "string" && claims.sub.length > 0 ? claims.sub : null;
   } catch {
     return null;
   }
+}
+
+/** id гостя или null, если токен подделан, просрочен или выпущен не для чата. */
+export async function verifyGuestToken(token: string, secret: string): Promise<number | null> {
+  const sub = await verifyToken(token, secret);
+  if (sub === null) return null;
+  const guestId = Number(sub);
+  if (!Number.isSafeInteger(guestId) || guestId <= 0 || guestId > MAX_GUEST_ID) return null;
+  return guestId;
 }

@@ -1,0 +1,1 @@
+export { VkLink } from "./ui";

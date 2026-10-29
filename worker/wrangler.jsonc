@@ -8,10 +8,19 @@
   "vars": {
     "CHAT_API_URL": "https://api.chatwithyou.site",
     "WEB_BOT_KEY": "site",
-    "ALLOWED_ORIGINS": "http://localhost:3000,http://localhost:3010"
+    "ALLOWED_ORIGINS": "http://localhost:3000,http://localhost:3010",
+    "AUTH_MAIL_FROM": "neon chat <noreply@chatwithyou.site>"
   },
   // Secrets (wrangler secret put): CHAT_API_APP_TOKEN, GUEST_JWT_SECRET,
-  // CF_ACCESS_CLIENT_ID, CF_ACCESS_CLIENT_SECRET.
+  // CF_ACCESS_CLIENT_ID, CF_ACCESS_CLIENT_SECRET, RESEND_API_KEY.
+  // KV для email-авторизации: создайте `wrangler kv namespace create AUTH`
+  // и подставьте id ниже.
+  "kv_namespaces": [
+    {
+      "binding": "AUTH_KV",
+      "id": "4d5c5b4f70184615993663470e802909"
+    }
+  ],
   "durable_objects": {
     "bindings": [{ "name": "GUEST_HUB", "class_name": "GuestHub" }]
   },

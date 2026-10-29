@@ -7,6 +7,7 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
   trailingSlash: true,
+  images: { unoptimized: true },
   ...(basePath ? { basePath, assetPrefix: basePath } : {}),
 };
 
