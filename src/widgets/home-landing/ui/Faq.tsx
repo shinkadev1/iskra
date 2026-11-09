@@ -33,7 +33,9 @@ export function Faq() {
                   </button>
                 </h3>
                 <div className="faq-panel" id={panelId} role="region" aria-labelledby={buttonId}>
-                  <p>{item.answer}</p>
+                  <div className="faq-panel-inner">
+                    <p>{item.answer}</p>
+                  </div>
                 </div>
               </article>
             );

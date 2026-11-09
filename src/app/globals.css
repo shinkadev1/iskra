@@ -856,9 +856,12 @@
     transition: grid-template-rows 0.25s ease;
   }
 
-  .faq-panel > p {
+  .faq-panel-inner {
     overflow: hidden;
     min-height: 0;
+  }
+
+  .faq-panel-inner > p {
     margin: 0;
     padding: 0 26px 24px;
     font-size: 1rem;
