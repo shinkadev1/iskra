@@ -116,7 +116,7 @@ export function HomeLanding() {
                   {tariff.price} <span>₽</span>
                 </p>
                 <p className="tariff-term">{tariff.term}</p>
-                <a className="tariff-btn" href={payUrl}>
+                <a className="tariff-btn" href={`${payUrl}/?plan=${tariff.id}`}>
                   Оплатить
                 </a>
               </article>
