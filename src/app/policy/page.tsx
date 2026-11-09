@@ -4,14 +4,14 @@ import { PolicyPage } from "@/views/policy";
 
 export const metadata: Metadata = {
   title: "Политика конфиденциальности",
-  description: `Политика конфиденциальности сайта ${siteName}.`,
+  description: `Политика конфиденциальности приложения Neon Chat, сайта и ботов ${siteName}: какие данные собираются, зачем и сколько хранятся.`,
   alternates: {
     canonical: "/policy/",
   },
   openGraph: {
     url: "/policy/",
     title: `Политика конфиденциальности в ${siteName}`,
-    description: `Политика конфиденциальности сайта ${siteName}.`,
+    description: `Политика конфиденциальности приложения Neon Chat, сайта и ботов ${siteName}: какие данные собираются, зачем и сколько хранятся.`,
   },
 };
 
