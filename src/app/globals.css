@@ -1331,7 +1331,7 @@
   }
 
   /* Узкие телефоны (320px и меньше): та же строка, плотнее. */
-  @media (max-width: 22.5rem) {
+  @media (max-width: 22.4375rem) {
     .header-inner {
       width: calc(100% - 1.5rem);
       gap: 6px;
