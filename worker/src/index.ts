@@ -1,6 +1,7 @@
 /** Публичный API чата для сайта: chatwithyou.site/api/* → Chat API за Cloudflare Access. */
 
 import { ChatApi, ChatApiError, type PeerAction } from "./chat-api";
+import { accountRoute } from "./account";
 import { authLogout, authRequest, authSession, authVerify } from "./auth";
 import { GUEST_ID_HEADER } from "./guest-hub";
 import { issueGuestToken, newGuestId, verifyGuestToken } from "./guest-token";
@@ -164,6 +165,8 @@ async function route(request: Request, env: Env): Promise<Response> {
   if (request.method === "POST" && path === "/auth/verify") return authVerify(request, env);
   if (request.method === "GET" && path === "/auth/session") return authSession(request, env);
   if (request.method === "POST" && path === "/auth/logout") return authLogout(request);
+  const account = await accountRoute(request, env, path);
+  if (account) return account;
   const media = path.match(/^\/me\/media\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i);
   if (request.method === "GET" && media) return guestMedia(request, env, media[1]);
   return guestAction(request, env, `${request.method} ${path}`);

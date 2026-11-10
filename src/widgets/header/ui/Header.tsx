@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { fetchSession, logout, requestCode, verifyCode } from "@/shared/api/auth";
 import { Icon } from "@/shared/ui/icon";
@@ -22,6 +22,7 @@ type AuthStage = "email" | "code" | "session";
 
 export function Header() {
   const pathname = usePathname();
+  const router = useRouter();
   const onChat = pathname === "/chat" || pathname === "/chat/";
   const onHome = pathname === "/" || pathname === "";
   const [open, setOpen] = useState(false);
@@ -96,14 +97,31 @@ export function Header() {
     }
   }, [authOpen, stage]);
 
-  const openAuth = () => {
+  const showAuth = () => {
     openerRef.current = document.activeElement as HTMLElement | null;
     setAuthError(null);
-    setStage(session ? "session" : "email");
+    setStage("email");
     setCode("");
     flowRef.current += 1;
     setAuthOpen(true);
   };
+
+  const openAuth = () => {
+    if (session) {
+      router.push("/account/");
+      return;
+    }
+    showAuth();
+  };
+
+  // Страницы (например, кабинет) просят открыть вход без клика по иконке.
+  useEffect(() => {
+    const onOpenAuth = () => showAuth();
+    window.addEventListener("neon:open-auth", onOpenAuth);
+    return () => window.removeEventListener("neon:open-auth", onOpenAuth);
+    // showAuth использует только стабильные setState и ref.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleRequestCode = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -136,7 +154,10 @@ export function Header() {
         return;
       }
       setSession(result.email);
-      setStage("session");
+      setAuthOpen(false);
+      // Кабинет, открытый до входа, перечитает данные (переход на тот же URL его не перемонтирует).
+      window.dispatchEvent(new CustomEvent("neon:auth-changed"));
+      router.push("/account/");
     } finally {
       setBusy(false);
     }
