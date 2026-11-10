@@ -1258,6 +1258,78 @@
     }
   }
 
+  /* Телефон: логотип, язык, профиль и меню в одной строке. */
+  @media (max-width: 40rem) {
+    .header-inner {
+      min-height: 0;
+      padding-block: 12px;
+      gap: 8px;
+    }
+
+    .header .logo {
+      gap: 10px;
+    }
+
+    .header .logo-badge {
+      width: 44px;
+      height: 44px;
+      padding: 2px;
+      border-radius: 13px;
+    }
+
+    .header .logo-badge-inner {
+      border-radius: 11px;
+    }
+
+    .header .logo-badge-letter {
+      font-size: 1.625rem;
+      padding-bottom: 3px;
+    }
+
+    .header .logo-name {
+      font-size: 1.375rem;
+    }
+
+    .header-actions {
+      order: 1;
+      margin-left: auto;
+      gap: 8px;
+    }
+
+    .nav-toggle {
+      order: 2;
+    }
+
+    .header-lang,
+    .header-icon-btn,
+    .nav-toggle {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+    }
+
+    .header-lang svg {
+      display: block;
+    }
+
+    /* Стрелка выбора языка на узком экране читается как «×». */
+    .header-lang-chevron {
+      display: none;
+    }
+
+    .header-icon-btn svg {
+      width: 22px;
+      height: 22px;
+    }
+
+    .header-profile-dot {
+      right: -4px;
+      top: -4px;
+      width: 10px;
+      height: 10px;
+    }
+  }
+
   /* ===== модалка авторизации ===== */
   .auth-overlay {
     position: fixed;
@@ -1802,7 +1874,8 @@
   /* ===== футер ===== */
   .footer {
     position: relative;
-    z-index: 2;
+    /* Ниже закреплённой шапки (--z-header), иначе при прокрутке футер рисуется поверх неё. */
+    z-index: 1;
     border-top: 1px solid rgba(255, 255, 255, 0.14);
     background: rgba(9, 10, 24, 0.85);
   }
