@@ -29,11 +29,13 @@ function formatDate(iso: string | null | undefined): string {
   return date.toLocaleDateString("ru-RU", { timeZone: "Europe/Moscow" });
 }
 
-function formatRub(amount: number): string {
+function formatRub(amount: number | null): string {
+  if (amount === null || amount === undefined) return "—";
   return `${amount.toLocaleString("ru-RU")} ₽`;
 }
 
-function formatDays(days: number): string {
+function formatDays(days: number | null): string {
+  if (days === null || days === undefined) return "—";
   const rest100 = days % 100;
   const rest10 = days % 10;
   if (rest100 < 11 || rest100 > 14) {
@@ -235,7 +237,7 @@ export function AccountPage() {
           </div>
           <div className="account-profile-text">
             <p className="account-eyebrow">Личный кабинет</p>
-            <h1 className="account-email">{account.email}</h1>
+            <h1 className="account-email">{account.email ?? ""}</h1>
           </div>
           <button
             className="account-btn account-btn-outline account-logout"
@@ -261,8 +263,8 @@ export function AccountPage() {
               </div>
               <div className="account-plan-main">
                 <p className="account-plan-title">
-                  <span>Премиум{sub ? ` · ${sub.plan_name}` : ""}</span>
-                  {sub && (
+                  <span>Премиум{sub?.plan_name ? ` · ${sub.plan_name}` : ""}</span>
+                  {sub && sub.price_rub != null && sub.days != null && (
                     <span className="account-tag">
                       {formatRub(sub.price_rub)} / {formatDays(sub.days)}
                     </span>
@@ -356,7 +358,7 @@ export function AccountPage() {
                       {payments.map((payment, index) => (
                         <tr key={`${payment.created_at}-${index}`}>
                           <td>{formatDate(payment.created_at)}</td>
-                          <td>{payment.plan_name}</td>
+                          <td>{payment.plan_name ?? "—"}</td>
                           <td className="account-sum">{formatRub(payment.amount_rub)}</td>
                           <td>
                             <span

@@ -43,7 +43,10 @@ async function callPay(env: Env, endpoint: string, email: string): Promise<Respo
   }
   if (upstream.status === 200) {
     try {
-      return json(await upstream.json());
+      const body = (await upstream.json()) as Record<string, unknown> | null;
+      // Для email без записей pay отдаёт email: null — это email самого пользователя.
+      if (body && typeof body === "object" && body.email == null) body.email = email;
+      return json(body);
     } catch {
       return detailError(502, UNAVAILABLE);
     }

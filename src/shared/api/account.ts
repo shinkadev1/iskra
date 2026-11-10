@@ -4,13 +4,13 @@ import { chatApiBaseUrl } from "./chat";
 
 const ACCOUNT_BASE = "/api/v1/me/subscription";
 
-export type NextCharge = { at: string; amount_rub: number; plan_name: string };
+export type NextCharge = { at: string; amount_rub: number | null; plan_name: string | null };
 
 export type Subscription = {
   plan_id: string;
-  plan_name: string;
-  price_rub: number;
-  days: number;
+  plan_name: string | null;
+  price_rub: number | null;
+  days: number | null;
   auto_renew: boolean;
   card_attached: boolean;
   card_last4: string | null;
@@ -22,14 +22,14 @@ export type Subscription = {
 
 export type Payment = {
   created_at: string;
-  plan_id: string;
-  plan_name: string;
-  amount_rub: number;
+  plan_id: string | null;
+  plan_name: string | null;
+  amount_rub: number | null;
   status: "paid" | "failed";
 };
 
 export type Account = {
-  email: string;
+  email: string | null;
   premium_until: string | null;
   premium_active: boolean;
   subscription: Subscription | null;
@@ -81,7 +81,7 @@ export async function fetchSubscription(): Promise<AccountResult> {
   const result = await send("", "GET");
   if (!result.ok) return result;
   const account = result.body as Account | null;
-  if (!account || typeof account.email !== "string" || !Array.isArray(account.payments)) {
+  if (!account || typeof account !== "object" || !Array.isArray(account.payments)) {
     return { ok: false, kind: "error", detail: "Неожиданный ответ сервера" };
   }
   return { ok: true, account };

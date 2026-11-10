@@ -236,7 +236,7 @@ export function Header() {
             <button
               className={`header-icon-btn header-profile${session ? " is-authed" : ""}`}
               type="button"
-              aria-label={session ? `${session}, вход в аккаунт` : "Войти по email"}
+              aria-label={session ? `Личный кабинет, ${session}` : "Войти по email"}
               aria-haspopup="dialog"
               onClick={openAuth}
             >
