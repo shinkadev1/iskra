@@ -1330,6 +1330,72 @@
     }
   }
 
+  /* Узкие телефоны (320px и меньше): та же строка, плотнее. */
+  @media (max-width: 22.5rem) {
+    .header-inner {
+      width: calc(100% - 1.5rem);
+      gap: 6px;
+    }
+
+    .header .logo {
+      gap: 8px;
+    }
+
+    .header .logo-badge {
+      width: 40px;
+      height: 40px;
+    }
+
+    .header .logo-badge-letter {
+      font-size: 1.5rem;
+    }
+
+    .header .logo-name {
+      font-size: 1.125rem;
+    }
+
+    .header-actions {
+      gap: 6px;
+    }
+
+    .header-lang,
+    .header-icon-btn,
+    .nav-toggle {
+      width: 40px;
+      height: 40px;
+    }
+  }
+
+  /* Очень узкие экраны (сложенные Galaxy Fold, ~280 px): шапка всё ещё в одну строку. */
+  @media (max-width: 18.75rem) {
+    .header .logo-badge {
+      width: 36px;
+      height: 36px;
+    }
+
+    .header .logo-badge-letter {
+      font-size: 1.375rem;
+    }
+
+    .header .logo-name {
+      font-size: 1rem;
+    }
+
+    .header-lang,
+    .header-icon-btn,
+    .nav-toggle {
+      width: 36px;
+      height: 36px;
+    }
+
+    .header-lang svg,
+    .header-icon-btn svg,
+    .nav-toggle svg {
+      width: 20px;
+      height: 20px;
+    }
+  }
+
   /* ===== модалка авторизации ===== */
   .auth-overlay {
     position: fixed;
