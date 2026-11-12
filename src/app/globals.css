@@ -1766,6 +1766,77 @@
     margin-top: 4px;
   }
 
+  .chat-locked {
+    position: relative;
+    display: block;
+    width: fit-content;
+    max-width: 100%;
+    overflow: hidden;
+    border-radius: 12px;
+  }
+
+  .chat-locked-img {
+    display: block;
+    max-width: 100%;
+    min-width: 220px;
+    min-height: 200px;
+    object-fit: cover;
+    filter: blur(14px);
+    transform: scale(1.1);
+  }
+
+  .chat-locked-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px;
+    background: rgba(9, 10, 24, 0.62);
+    text-align: center;
+  }
+
+  .chat-locked-icon {
+    display: inline-flex;
+    width: 28px;
+    height: 28px;
+    color: #fff;
+  }
+
+  .chat-locked-icon svg {
+    width: 100%;
+    height: 100%;
+    fill: currentColor;
+  }
+
+  .chat-locked-text {
+    margin: 0;
+    max-width: 22ch;
+    color: #fff;
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1.35;
+  }
+
+  .chat-locked-btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 16px;
+    border-radius: var(--r-btn);
+    background: #fff;
+    color: #090a18;
+    font-size: 0.875rem;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .chat-locked-btn:hover {
+    filter: brightness(0.92);
+    color: #090a18;
+  }
+
   .chat-bubble-partner {
     align-self: flex-start;
     background: var(--surface-3);

@@ -16,6 +16,8 @@ import {
   type ChatEvent,
   type Phase,
 } from "@/shared/api/chat";
+import { payUrl } from "@/shared/config/site";
+import { Icon } from "@/shared/ui/icon";
 
 type UiMessage = {
   id: string;
@@ -23,6 +25,7 @@ type UiMessage = {
   text: string;
   mediaUrl?: string;
   mediaKind?: string;
+  locked?: boolean;
 };
 
 const phaseLabel: Record<Exclude<Phase, "idle">, string> = {
@@ -46,6 +49,28 @@ function formatOnline(count: number): string {
 
 function nextId(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function LockedPhoto({ url }: { url: string }) {
+  return (
+    <div className="chat-locked">
+      <img className="chat-locked-img" src={url} alt="Скрытое фото собеседника" />
+      <div className="chat-locked-overlay">
+        <span className="chat-locked-icon">
+          <Icon name="lock" />
+        </span>
+        <p className="chat-locked-text">Просмотр фото доступен только с премиумом</p>
+        <a
+          className="chat-locked-btn"
+          href={`${payUrl}/`}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          💎 Купить премиум
+        </a>
+      </div>
+    </div>
+  );
 }
 
 function PartnerFile({ url, kind, alt }: { url: string; kind: string; alt: string }) {
@@ -118,6 +143,7 @@ export function ChatRoom() {
                 text: "",
                 mediaUrl: file.url,
                 mediaKind: event.kind || file.kind,
+                locked: event.locked === true,
               },
             ]);
           })
@@ -355,7 +381,9 @@ export function ChatRoom() {
                 key={item.id}
                 className={`chat-bubble chat-bubble-${item.role}`}
               >
-                {item.mediaUrl ? (
+                {item.mediaUrl && item.locked && (item.mediaKind || "photo") === "photo" ? (
+                  <LockedPhoto url={item.mediaUrl} />
+                ) : item.mediaUrl ? (
                   <PartnerFile
                     url={item.mediaUrl}
                     kind={item.mediaKind || "photo"}

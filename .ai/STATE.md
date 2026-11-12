@@ -1,5 +1,10 @@
 # Состояние landing
 
+## 2026-11-12 — размытое фото (loop/photo-blur)
+
+Изменены `shared/api/chat/index.ts` (`locked?` в media), `ChatRoom.tsx` (LockedPhoto), `globals.css` (.chat-locked*). `npm ci` + `npm run build` прошли. Не выкачено; интеграция с сервером, отдающим `locked`, не проверялась.
+
+
 ## Оркестрация Codex, 2026-10-31
 
 Добавлены .codex/config.toml и пять ролей, AGENTS.md дополнен маршрутизацией и workflow. Luna/low — диспетчер и дешёвые роли; Sol/medium — developer; Astra (gpt-6-astra)/high — planner и reviewer (выбор подтверждён пользователем). 42 TOML-файла и 7 конфигураций прошли разбор и строгую проверку установленным CLI; независимый reviewer PASS. Существующие инструкции сохранены. Выполнен mobile typecheck; lint недоступен из-за исходно отсутствующей настройки ESLint. Реальный запуск ролей и смена модели текущего чата не тестировались.
